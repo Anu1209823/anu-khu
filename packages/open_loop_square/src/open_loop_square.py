@@ -12,7 +12,7 @@ class Drive_Square:
         rospy.init_node('drive_square_node', anonymous=True)
 
         # Update this to your actual Duckiebot name
-        self.vehicle_name = "anukhupi"
+        self.vehicle_name = "anukhu"
 
         # Publisher to send motion commands
         self.pub = rospy.Publisher(
