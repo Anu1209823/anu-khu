@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>square_bot_pkg</name>
+  <name>open_loop_square</name>
   <version>0.0.0</version>
-  <description>The square_bot_pkg package</description>
+  <description>The open_loop_square package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

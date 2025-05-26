@@ -1,6 +1,7 @@
 <launch>
-    <!-- vehicle name so it can work with any robot -->
-    <group ns="$(env VEHICLE_NAME)">
-        <node pkg="open_loop_square" name="open_loop_square" type="open_loop_square.py" output="screen"/>
-    </group>
+    <node pkg="open_loop_square"
+          name="open_loop_square"
+          type="open_loop_square.py"
+          output="screen" />
 </launch>
+
