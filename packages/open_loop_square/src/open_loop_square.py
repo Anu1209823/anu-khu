@@ -3,7 +3,7 @@
 import rospy
 from duckietown_msgs.msg import Twist2DStamped, FSMState
 
-class DriveStraight:
+class DriveStraightOnly:
     def __init__(self):
         self.cmd_msg = Twist2DStamped()
         rospy.init_node('drive_straight_node', anonymous=True)
@@ -26,18 +26,18 @@ class DriveStraight:
         rospy.loginfo(f"FSM mode received: {msg.state}")
         if msg.state == "NORMAL_LANE_FOLLOWING":
             rospy.sleep(1)
-            self.drive_forward()
+            self.drive_straight()
 
-    def drive_forward(self):
+    def drive_straight(self):
         self.cmd_msg.header.stamp = rospy.Time.now()
-        self.cmd_msg.v = 0.25     # Adjust if too fast or too slow
+        self.cmd_msg.v = 0.25  # You can adjust speed here
         self.cmd_msg.omega = 0.0
         self.pub.publish(self.cmd_msg)
-        rospy.loginfo("Driving straight for 8 seconds...")
-        rospy.sleep(8.0)
+        rospy.loginfo("Driving forward for 11 seconds...")
+        rospy.sleep(11)
 
         self.stop_robot()
-        rospy.loginfo("Robot stopped.")
+        rospy.loginfo("Done. Robot stopped.")
 
     def stop_robot(self):
         self.cmd_msg.header.stamp = rospy.Time.now()
@@ -50,7 +50,7 @@ class DriveStraight:
 
 if __name__ == '__main__':
     try:
-        bot = DriveStraight()
+        bot = DriveStraightOnly()
         bot.run()
     except rospy.ROSInterruptException:
         pass
