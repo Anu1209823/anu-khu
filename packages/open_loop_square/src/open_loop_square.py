@@ -27,24 +27,24 @@ class DriveSquare:
         if msg.state == "NORMAL_LANE_FOLLOWING":
             rospy.sleep(1)
             self.drive_square()
-
+ 
     def drive_square(self):
         for i in range(4):  # 4 sides
             # Drive straight
             self.cmd_msg.header.stamp = rospy.Time.now()
-            self.cmd_msg.v = 0.25
+            self.cmd_msg.v = 0.25  # speed in m/s
             self.cmd_msg.omega = 0.0
             self.pub.publish(self.cmd_msg)
             rospy.loginfo(f"Side {i+1}: Driving forward")
-            rospy.sleep(9)
+            rospy.sleep(6)  # 0.25 m/s * 6 s = 1.5 m
 
             # Turn 90°
             self.cmd_msg.header.stamp = rospy.Time.now()
             self.cmd_msg.v = 0.0
-            self.cmd_msg.omega = 3.14  # angular velocity in rad/s
+            self.cmd_msg.omega = 3.14  # radians/sec
             self.pub.publish(self.cmd_msg)
             rospy.loginfo(f"Side {i+1}: Turning 90 degrees")
-            rospy.sleep(0.55)  # adjust based on turning performance
+            rospy.sleep(0.55)  # ~90 degrees
 
         self.stop_robot()
         rospy.loginfo("Finished square. Robot stopped.")
