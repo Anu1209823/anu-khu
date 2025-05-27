@@ -2,67 +2,59 @@
 
 import rospy
 from duckietown_msgs.msg import Twist2DStamped
-from duckietown_msgs.msg import FSMState
 from duckietown_msgs.msg import AprilTagDetectionArray
 
 class Target_Follower:
     def __init__(self):
-        
-        #Initialize ROS node
         rospy.init_node('target_follower_node', anonymous=True)
-
-        # When shutdown signal is received, we run clean_shutdown function
         rospy.on_shutdown(self.clean_shutdown)
-        
-        ###### Init Pub/Subs. REMEMBER TO REPLACE "akandb" WITH YOUR ROBOT'S NAME #####
         self.cmd_vel_pub = rospy.Publisher('/anukhu/car_cmd_switch_node/cmd', Twist2DStamped, queue_size=1)
         rospy.Subscriber('/anukhu/apriltag_detector_node/detections', AprilTagDetectionArray, self.tag_callback, queue_size=1)
-        ################################################################
+        rospy.spin()
 
-        rospy.spin() # Spin forever but listen to message callbacks
-
-    # Apriltag Detection Callback
-    def tag_callback(self, msg):
-        self.move_robot(msg.detections)
- 
-    # Stop Robot before node has shut down. This ensures the robot keep moving with the latest velocity command
     def clean_shutdown(self):
         rospy.loginfo("System shutting down. Stopping robot...")
         self.stop_robot()
 
-    # Sends zero velocity to stop the robot
     def stop_robot(self):
-        cmd_msg = Twist2DStamped()
-        cmd_msg.header.stamp = rospy.Time.now()
-        cmd_msg.v = 0.0
-        cmd_msg.omega = 0.0
-        self.cmd_vel_pub.publish(cmd_msg)
+        cmd = Twist2DStamped()
+        cmd.header.stamp = rospy.Time.now()
+        cmd.v = 0.0
+        cmd.omega = 0.0
+        self.cmd_vel_pub.publish(cmd)
 
     def move_robot(self, detections):
+        TARGET_DISTANCE = 0.25
+        MAX_LIN_VEL = 0.4
+        MAX_ANG_VEL = 5.0
+        LIN_KP = 1.2
+        ANG_KP = 8.0
 
-        #### YOUR CODE GOES HERE ####
+        cmd = Twist2DStamped()
+        cmd.header.stamp = rospy.Time.now()
 
-        if len(detections) == 0:
-            return
+        if not detections:
+            cmd.v = 0.0
+            cmd.omega = 0.0
+            rospy.loginfo("No AprilTag detected.")
+        else:
+            tag = detections[0]
+            x = tag.transform.translation.x
+            z = tag.transform.translation.z
+            rospy.loginfo("Tag position: x = %.3f m, z = %.3f m", x, z)
+            lin_error = z - TARGET_DISTANCE
+            ang_error = -x
+            cmd.v = max(min(LIN_KP * lin_error, MAX_LIN_VEL), -MAX_LIN_VEL)
+            cmd.omega = max(min(ANG_KP * ang_error, MAX_ANG_VEL), -MAX_ANG_VEL)
 
-        x = detections[0].transform.translation.x
-        y = detections[0].transform.translation.y
-        z = detections[0].transform.translation.z
+        self.cmd_vel_pub.publish(cmd)
 
-        rospy.loginfo("x,y,z: %f %f %f", x, y, z)
-
-
-        # Publish a velocity
-        cmd_msg = Twist2DStamped()
-        cmd_msg.header.stamp = rospy.Time.now()
-        cmd_msg.v = 0.0
-        cmd_msg.omega = 0.0
-        self.cmd_vel_pub.publish(cmd_msg)
-
-        #############################
+    def tag_callback(self, msg):
+        self.move_robot(msg.detections)
 
 if __name__ == '__main__':
     try:
-        target_follower = Target_Follower()
+        Target_Follower()
     except rospy.ROSInterruptException:
         pass
+
