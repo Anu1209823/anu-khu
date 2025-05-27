@@ -4,68 +4,65 @@ import rospy
 from duckietown_msgs.msg import Twist2DStamped
 from duckietown_msgs.msg import AprilTagDetectionArray
 
-class Target_Follower:
+class Target_Seeker:
     def __init__(self):
-        rospy.init_node('target_follower_node', anonymous=True)
+        rospy.init_node('target_seeker_node', anonymous=True)
         rospy.on_shutdown(self.clean_shutdown)
-        self.cmd_vel_pub = rospy.Publisher(
-            '/anukhu/car_cmd_switch_node/cmd', Twist2DStamped, queue_size=1
+
+        self.vehicle_name = "anukhu"
+        self.cmd_pub = rospy.Publisher(
+            f"/{self.vehicle_name}/car_cmd_switch_node/cmd", 
+            Twist2DStamped, 
+            queue_size=1
         )
         rospy.Subscriber(
-            '/anukhu/apriltag_detector_node/detections',
+            f"/{self.vehicle_name}/apriltag_detector_node/detections",
             AprilTagDetectionArray,
             self.tag_callback,
             queue_size=1
         )
-        rospy.spin()
 
-    def clean_shutdown(self):
-        rospy.loginfo("System shutting down. Stopping robot...")
-        self.stop_robot()
+        self.seeking = True
+        self.rate = rospy.Rate(10)  # 10 Hz
+
+        self.run_loop()
+
+    def run_loop(self):
+        while not rospy.is_shutdown():
+            if self.seeking:
+                self.rotate_in_place()
+            self.rate.sleep()
+
+    def tag_callback(self, msg):
+        if len(msg.detections) == 0:
+            rospy.loginfo("No tag detected – seeking...")
+            self.seeking = True
+        else:
+            rospy.loginfo("Tag detected – stopping rotation.")
+            self.seeking = False
+            self.stop_robot()
+
+    def rotate_in_place(self):
+        cmd = Twist2DStamped()
+        cmd.header.stamp = rospy.Time.now()
+        cmd.v = 0.0
+        cmd.omega = 1.5  # Adjust this speed if needed
+        self.cmd_pub.publish(cmd)
 
     def stop_robot(self):
         cmd = Twist2DStamped()
         cmd.header.stamp = rospy.Time.now()
         cmd.v = 0.0
         cmd.omega = 0.0
-        self.cmd_vel_pub.publish(cmd)
+        self.cmd_pub.publish(cmd)
 
-    def move_robot(self, detections):
-        TARGET_DISTANCE = 0.25
-        MAX_LIN_VEL = 0.4
-        MAX_ANG_VEL = 5.0
-        LIN_KP = 1.2
-        ANG_KP = 8.0
-
-        cmd = Twist2DStamped()
-        cmd.header.stamp = rospy.Time.now()
-
-        if not detections:
-            # 🔁 Feature 1: Seek mode — spin in place to find a tag
-            cmd.v = 0.0
-            cmd.omega = 1.5  # Adjust spin speed as needed
-            rospy.loginfo("No tag detected — seeking by rotating.")
-        else:
-            tag = detections[0]
-            x = tag.transform.translation.x
-            z = tag.transform.translation.z
-            rospy.loginfo("Tag position: x = %.3f m, z = %.3f m", x, z)
-
-            # 🚫 Remove forward motion, only rotate
-            lin_error = 0  # Disable forward motion
-            ang_error = -x
-            cmd.v = 0.0
-            cmd.omega = max(min(ANG_KP * ang_error, MAX_ANG_VEL), -MAX_ANG_VEL)
-            rospy.loginfo("Tag detected — rotating to center.")
-
-        self.cmd_vel_pub.publish(cmd)
-
-    def tag_callback(self, msg):
-        self.move_robot(msg.detections)
+    def clean_shutdown(self):
+        rospy.loginfo("Shutdown initiated, stopping robot...")
+        self.stop_robot()
 
 if __name__ == '__main__':
     try:
-        Target_Follower()
+        Target_Seeker()
     except rospy.ROSInterruptException:
         pass
 
