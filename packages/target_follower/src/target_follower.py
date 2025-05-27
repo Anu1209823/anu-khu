@@ -8,8 +8,15 @@ class Target_Follower:
     def __init__(self):
         rospy.init_node('target_follower_node', anonymous=True)
         rospy.on_shutdown(self.clean_shutdown)
-        self.cmd_vel_pub = rospy.Publisher('/anukhu/car_cmd_switch_node/cmd', Twist2DStamped, queue_size=1)
-        rospy.Subscriber('/anukhu/apriltag_detector_node/detections', AprilTagDetectionArray, self.tag_callback, queue_size=1)
+        self.cmd_vel_pub = rospy.Publisher(
+            '/anukhu/car_cmd_switch_node/cmd', Twist2DStamped, queue_size=1
+        )
+        rospy.Subscriber(
+            '/anukhu/apriltag_detector_node/detections',
+            AprilTagDetectionArray,
+            self.tag_callback,
+            queue_size=1
+        )
         rospy.spin()
 
     def clean_shutdown(self):
@@ -34,18 +41,22 @@ class Target_Follower:
         cmd.header.stamp = rospy.Time.now()
 
         if not detections:
+            # 🔁 Feature 1: Seek mode — spin in place to find a tag
             cmd.v = 0.0
-            cmd.omega = 0.0
-            rospy.loginfo("No AprilTag detected.")
+            cmd.omega = 1.5  # Adjust spin speed as needed
+            rospy.loginfo("No tag detected — seeking by rotating.")
         else:
             tag = detections[0]
             x = tag.transform.translation.x
             z = tag.transform.translation.z
             rospy.loginfo("Tag position: x = %.3f m, z = %.3f m", x, z)
-            lin_error = z - TARGET_DISTANCE
+
+            # 🚫 Remove forward motion, only rotate
+            lin_error = 0  # Disable forward motion
             ang_error = -x
-            cmd.v = max(min(LIN_KP * lin_error, MAX_LIN_VEL), -MAX_LIN_VEL)
+            cmd.v = 0.0
             cmd.omega = max(min(ANG_KP * ang_error, MAX_ANG_VEL), -MAX_ANG_VEL)
+            rospy.loginfo("Tag detected — rotating to center.")
 
         self.cmd_vel_pub.publish(cmd)
 
