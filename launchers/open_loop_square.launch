@@ -1,7 +1,0 @@
-<launch>
-    <node pkg="open_loop_square"
-          name="open_loop_square"
-          type="open_loop_square.py"
-          output="screen" />
-</launch>
-
