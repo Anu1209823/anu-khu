@@ -33,16 +33,16 @@ class Lane_Detector:
         img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-    def show_hsv(event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print("HSV at ({},{}): {}".format(x, y, hsv[y, x]))
-
+        # Show the image
         cv2.imshow('Image', img)
-        cv2.setMouseCallback('Image', show_hsv)
+        # Mouse callback to print HSV values on click
+        cv2.setMouseCallback('Image', self.show_hsv, hsv)
         cv2.waitKey(1)
 
-
-
+    @staticmethod
+    def show_hsv(event, x, y, flags, hsv_img):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            print("HSV at ({},{}): {}".format(x, y, hsv_img[y, x]))
 
     def run(self):
         rospy.spin() # Spin forever but listen to message callbacks
