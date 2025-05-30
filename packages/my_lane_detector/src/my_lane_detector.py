@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+print("Python lane detector starting...")
 
 # Python Libs
 import sys, time
@@ -30,22 +31,26 @@ class Lane_Detector:
         rospy.init_node("my_lane_detector")
 
     def image_callback(self, msg):
-        img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
+    height, width, _ = img.shape
+    cropped = img[int(height/2):, :]
 
-        # Show the image
-        cv2.imshow('Image', img)
-        # Mouse callback to print HSV values on click
-        cv2.setMouseCallback('Image', self.show_hsv, hsv)
-        cv2.waitKey(1)
+    # HSV conversion
+    hsv = cv2.cvtColor(cropped, cv2.COLOR_BGR2HSV)
+    cv2.imshow('HSV', hsv)  # (Optional, looks weird but you can see values)
 
-    @staticmethod
-    def show_hsv(event, x, y, flags, hsv_img):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print("HSV at ({},{}): {}".format(x, y, hsv_img[y, x]))
+    # White mask (tune these values as needed)
+    lower_white = np.array([0, 0, 150])
+    upper_white = np.array([180, 60, 255])
+    white_mask = cv2.inRange(hsv, lower_white, upper_white)
+    cv2.imshow('White Mask', white_mask)
 
-    def run(self):
-        rospy.spin() # Spin forever but listen to message callbacks
+    # Apply mask to see the actual white lanes
+    white_result = cv2.bitwise_and(cropped, cropped, mask=white_mask)
+    cv2.imshow('White Lane Filter', white_result)
+
+    cv2.waitKey(1)
+
 
 if __name__ == "__main__":
     try:
