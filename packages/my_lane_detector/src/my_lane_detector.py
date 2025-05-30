@@ -35,9 +35,10 @@ class Lane_Detector:
         img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
         height, width, _ = img.shape
         cropped = img[int(height/2):, :]
-        # Convert cropped image to grayscale
         gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('Grayscale', gray)
+        # Detect edges
+        edges = cv2.Canny(gray, 50, 150)
+        cv2.imshow('Edges', edges)
         cv2.waitKey(1)
 
 
