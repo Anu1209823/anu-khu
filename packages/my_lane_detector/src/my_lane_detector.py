@@ -19,25 +19,23 @@ class Lane_Detector:
 
     def image_callback(self, msg):
         img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
-        height, width, _ = img.shape
-        cropped = img[int(height/2):, :]  # Crop to bottom half
+        cropped = img  # No cropping; use the full image
 
         # Convert to HSV color space
         hsv = cv2.cvtColor(cropped, cv2.COLOR_BGR2HSV)
 
-        # White tape mask
+        # White mask
         lower_white = np.array([0, 0, 150])
         upper_white = np.array([180, 50, 255])
         white_mask = cv2.inRange(hsv, lower_white, upper_white)
-
-        # Show white mask
         cv2.imshow('White Mask', white_mask)
 
-        # Show only the white areas in color
+        # Show only the white lane in color
         white_lane = cv2.bitwise_and(cropped, cropped, mask=white_mask)
         cv2.imshow('White Lane Detected', white_lane)
 
         cv2.waitKey(1)
+
 
     def run(self):
         rospy.spin()
