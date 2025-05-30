@@ -32,11 +32,13 @@ class Lane_Detector:
         rospy.init_node("my_lane_detector")
 
     def image_callback(self, msg):
-        # Convert to OpenCV image
         img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
-        # Show the original image
-        cv2.imshow('Original', img)
+        # Crop the bottom half
+        height, width, _ = img.shape
+        cropped = img[int(height/2):, :]
+        cv2.imshow('Cropped', cropped)
         cv2.waitKey(1)
+
 
 
     def run(self):
