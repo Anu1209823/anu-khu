@@ -21,7 +21,7 @@ class Lane_Detector:
     def __init__(self):
         self.cv_bridge = CvBridge()
 
-        # CHANGED TOPIC NAME FOR YOUR ROBOT!
+        # Subscribe to the camera topic for your robot 'anukhu'
         self.image_sub = rospy.Subscriber(
             '/anukhu/camera_node/image/compressed',
             CompressedImage,
@@ -36,13 +36,9 @@ class Lane_Detector:
 
         # Convert to opencv image 
         img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
-        
-        #### YOUR CODE GOES HERE ####
 
-        # flip along the horizontal axis using an OpenCV function
-        img_out = cv2.flip(img, 0)
-
-        #############################
+        # Show the image as it is (no flipping)
+        img_out = img
 
         # Show image in a window
         cv2.imshow('img_out', img_out)
