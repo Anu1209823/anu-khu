@@ -32,17 +32,12 @@ class Lane_Detector:
         rospy.init_node("my_lane_detector")
 
     def image_callback(self, msg):
-        rospy.loginfo("image_callback")
+    # Convert to OpenCV image
+    img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
+    # Show the original image
+    cv2.imshow('Original', img)
+    cv2.waitKey(1)
 
-        # Convert to opencv image 
-        img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
-
-        # Show the image as it is (no flipping)
-        img_out = img
-
-        # Show image in a window
-        cv2.imshow('img_out', img_out)
-        cv2.waitKey(1)
 
     def run(self):
         rospy.spin() # Spin forever but listen to message callbacks
