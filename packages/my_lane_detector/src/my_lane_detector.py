@@ -33,10 +33,11 @@ class Lane_Detector:
 
     def image_callback(self, msg):
         img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
-        # Crop the bottom half
         height, width, _ = img.shape
         cropped = img[int(height/2):, :]
-        cv2.imshow('Cropped', cropped)
+        # Convert cropped image to grayscale
+        gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+        cv2.imshow('Grayscale', gray)
         cv2.waitKey(1)
 
 
