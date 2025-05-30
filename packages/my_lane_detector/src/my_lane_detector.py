@@ -36,10 +36,17 @@ class Lane_Detector:
         height, width, _ = img.shape
         cropped = img[int(height/2):, :]
         gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
-        # Detect edges
         edges = cv2.Canny(gray, 50, 150)
-        cv2.imshow('Edges', edges)
+        # Detect lane lines using Hough Transform
+        lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=50, minLineLength=50, maxLineGap=10)
+        line_img = np.copy(cropped)
+        if lines is not None:
+            for line in lines:
+                x1, y1, x2, y2 = line[0]
+                cv2.line(line_img, (x1, y1), (x2, y2), (0,255,0), 2)
+        cv2.imshow('Lane Lines', line_img)
         cv2.waitKey(1)
+
 
 
 
