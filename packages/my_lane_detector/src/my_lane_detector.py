@@ -19,21 +19,28 @@ class Lane_Detector:
 
     def image_callback(self, msg):
         img = self.cv_bridge.compressed_imgmsg_to_cv2(msg, "bgr8")
-        cropped = img  # No cropping; use the full image
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-        # Convert to HSV color space
-        hsv = cv2.cvtColor(cropped, cv2.COLOR_BGR2HSV)
-
-        # White mask
         lower_white = np.array([0, 0, 110])
         upper_white = np.array([180, 70, 255])
         white_mask = cv2.inRange(hsv, lower_white, upper_white)
+
+        kernel = np.ones((5,5), np.uint8)
+        white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_CLOSE, kernel)
+        white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_OPEN, kernel)
+
         cv2.imshow('White Mask', white_mask)
 
-        # Show only the white lane in color
-        white_lane = cv2.bitwise_and(cropped, cropped, mask=white_mask)
-        cv2.imshow('White Lane Detected', white_lane)
+        edges = cv2.Canny(white_mask, 50, 150)
+        cv2.imshow('Edges', edges)
 
+        lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=50, minLineLength=50, maxLineGap=10)
+        lane_img = img.copy()
+        if lines is not None:
+            for line in lines:
+                x1, y1, x2, y2 = line[0]
+                cv2.line(lane_img, (x1, y1), (x2, y2), (0,255,0), 2)
+        cv2.imshow('Lane Lines', lane_img)
         cv2.waitKey(1)
 
 
