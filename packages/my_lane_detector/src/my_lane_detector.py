@@ -25,8 +25,8 @@ class Lane_Detector:
         hsv = cv2.cvtColor(cropped, cv2.COLOR_BGR2HSV)
 
         # White mask
-        lower_white = np.array([0, 0, 150])
-        upper_white = np.array([180, 50, 255])
+        lower_white = np.array([0, 0, 110])
+        upper_white = np.array([180, 70, 255])
         white_mask = cv2.inRange(hsv, lower_white, upper_white)
         cv2.imshow('White Mask', white_mask)
 
