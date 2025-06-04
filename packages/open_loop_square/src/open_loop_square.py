@@ -24,9 +24,10 @@ class DriveSquare:
 
     def fsm_callback(self, msg):
         rospy.loginfo(f"FSM mode received: {msg.state}")
-        if msg.state == "NORMAL_LANE_FOLLOWING":
+        if msg.state == "LANE_FOLLOWING":
             rospy.sleep(1)
             self.drive_square()
+
  
     def drive_square(self):
         for i in range(4):  # 4 sides
