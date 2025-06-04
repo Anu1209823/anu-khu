@@ -39,7 +39,7 @@ class DriveSquare:
         rospy.loginfo(f"PUBLISHING DRIVE: v={self.cmd_msg.v}, omega={self.cmd_msg.omega}")
         self.pub.publish(self.cmd_msg)
         rospy.loginfo(f"Side {i+1}: Driving forward")
-        rospy.sleep(5)
+        rospy.sleep(3)
 
         # Turn 90°
         self.cmd_msg.header.stamp = rospy.Time.now()
@@ -48,7 +48,7 @@ class DriveSquare:
         rospy.loginfo(f"PUBLISHING TURN: v={self.cmd_msg.v}, omega={self.cmd_msg.omega}")
         self.pub.publish(self.cmd_msg)
         rospy.loginfo(f"Side {i+1}: Turning 90 degrees")
-        rospy.sleep(0.55)
+        rospy.sleep(0.35)
 
     self.stop_robot()
     rospy.loginfo("Finished square. Robot stopped.")
