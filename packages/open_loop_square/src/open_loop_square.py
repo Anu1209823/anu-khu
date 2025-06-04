@@ -36,11 +36,11 @@ class DriveSquare:
         for i in range(4):  # 4 sides of the square
             # Drive straight
             cmd_msg.header.stamp = rospy.Time.now()
-            cmd_msg.v = 0.25  # meters per second
+            cmd_msg.v = 0.20  # meters per second
             cmd_msg.omega = 0.0
             rospy.loginfo(f"Side {i+1}: Driving forward")
             self.pub.publish(cmd_msg)
-            rospy.sleep(6)  # Move straight (adjust if needed)
+            rospy.sleep(4)  # Move straight (adjust if needed)
 
             # Turn 90 degrees
             cmd_msg.header.stamp = rospy.Time.now()
@@ -48,7 +48,7 @@ class DriveSquare:
             cmd_msg.omega = 3.14  # rad/sec (adjust if turns are too wide/tight)
             rospy.loginfo(f"Side {i+1}: Turning 90 degrees")
             self.pub.publish(cmd_msg)
-            rospy.sleep(0.55)  # Turn in place (adjust if needed)
+            rospy.sleep(0.20)  # Turn in place (adjust if needed)
 
         self.stop_robot()
         rospy.loginfo("Finished square. Robot stopped.")
