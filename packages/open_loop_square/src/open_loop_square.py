@@ -23,7 +23,6 @@ class DriveSquare:
 
     def fsm_callback(self, msg):
         rospy.loginfo(f"FSM mode received: {msg.state}")
-        # Only run if entering LANE_FOLLOWING and not already running
         if msg.state == "LANE_FOLLOWING" and not self.in_motion:
             self.in_motion = True
             rospy.sleep(1)  # Give robot a moment to stabilize
@@ -34,21 +33,21 @@ class DriveSquare:
     def drive_square(self):
         cmd_msg = Twist2DStamped()
         for i in range(4):  # 4 sides of the square
-            # Drive straight
+            # Go straight for 7 seconds
             cmd_msg.header.stamp = rospy.Time.now()
             cmd_msg.v = 0.25  # meters per second
             cmd_msg.omega = 0.0
-            rospy.loginfo(f"Side {i+1}: Driving forward")
+            rospy.loginfo(f"Side {i+1}: Driving forward for 7 seconds")
             self.pub.publish(cmd_msg)
-            rospy.sleep(2)  # Move straight (adjust if needed)
+            rospy.sleep(7)  # 7 seconds straight
 
             # Turn 90 degrees
             cmd_msg.header.stamp = rospy.Time.now()
             cmd_msg.v = 0.0
-            cmd_msg.omega = 3.14  # rad/sec (adjust if turns are too wide/tight)
+            cmd_msg.omega = 3.14  # rad/sec
             rospy.loginfo(f"Side {i+1}: Turning 90 degrees")
             self.pub.publish(cmd_msg)
-            rospy.sleep(0.55)  # Turn in place (adjust if needed)
+            rospy.sleep(0.55)  # ~90 degrees (tune if necessary)
 
         self.stop_robot()
         rospy.loginfo("Finished square. Robot stopped.")
