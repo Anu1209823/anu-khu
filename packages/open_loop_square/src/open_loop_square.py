@@ -40,7 +40,7 @@ class DriveSquare:
             cmd_msg.omega = 0.0
             rospy.loginfo(f"Side {i+1}: Driving forward")
             self.pub.publish(cmd_msg)
-            rospy.sleep(1)  # Move straight (adjust if needed)
+            rospy.sleep(4)  # Move straight (adjust if needed)
 
             # Turn 90 degrees
             cmd_msg.header.stamp = rospy.Time.now()
