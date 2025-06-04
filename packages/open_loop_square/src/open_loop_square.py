@@ -31,26 +31,27 @@ class DriveSquare:
             self.in_motion = False  # Reset when leaving state
 
     def drive_square(self):
-        cmd_msg = Twist2DStamped()
-        for i in range(4):  # 4 sides of the square
-            # Go straight for 7 seconds
-            cmd_msg.header.stamp = rospy.Time.now()
-            cmd_msg.v = 0.25  # meters per second
-            cmd_msg.omega = 0.0
-            rospy.loginfo(f"Side {i+1}: Driving forward for 7 seconds")
-            self.pub.publish(cmd_msg)
-            rospy.sleep(7)  # 7 seconds straight
+    for i in range(4):  # 4 sides
+        # Drive straight
+        self.cmd_msg.header.stamp = rospy.Time.now()
+        self.cmd_msg.v = 0.25  # speed in m/s
+        self.cmd_msg.omega = 0.0
+        rospy.loginfo(f"PUBLISHING DRIVE: v={self.cmd_msg.v}, omega={self.cmd_msg.omega}")
+        self.pub.publish(self.cmd_msg)
+        rospy.loginfo(f"Side {i+1}: Driving forward")
+        rospy.sleep(5)
 
-            # Turn 90 degrees
-            cmd_msg.header.stamp = rospy.Time.now()
-            cmd_msg.v = 0.0
-            cmd_msg.omega = 3.14  # rad/sec
-            rospy.loginfo(f"Side {i+1}: Turning 90 degrees")
-            self.pub.publish(cmd_msg)
-            rospy.sleep(0.55)  # ~90 degrees (tune if necessary)
+        # Turn 90°
+        self.cmd_msg.header.stamp = rospy.Time.now()
+        self.cmd_msg.v = 0.0
+        self.cmd_msg.omega = 3.14
+        rospy.loginfo(f"PUBLISHING TURN: v={self.cmd_msg.v}, omega={self.cmd_msg.omega}")
+        self.pub.publish(self.cmd_msg)
+        rospy.loginfo(f"Side {i+1}: Turning 90 degrees")
+        rospy.sleep(0.55)
 
-        self.stop_robot()
-        rospy.loginfo("Finished square. Robot stopped.")
+    self.stop_robot()
+    rospy.loginfo("Finished square. Robot stopped.")
 
     def stop_robot(self):
         cmd_msg = Twist2DStamped()
